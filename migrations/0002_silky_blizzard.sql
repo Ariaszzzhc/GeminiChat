@@ -1,0 +1,1 @@
+ALTER TABLE "chat" ALTER COLUMN "sharePath" DROP NOT NULL;

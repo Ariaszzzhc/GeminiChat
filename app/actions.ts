@@ -2,10 +2,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { kv } from '@vercel/kv'
 
-import { auth } from '@/auth'
+import { auth } from '@/lib/auth'
 import { type Chat } from '@/lib/types'
+import { db } from '@/lib/db'
+import { eq } from 'drizzle-orm'
+import { chat } from '@/lib/schema'
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
@@ -13,31 +15,26 @@ export async function getChats(userId?: string | null) {
   }
 
   try {
-    const pipeline = kv.pipeline()
-    const chats: string[] = await kv.zrange(`user:chat:${userId}`, 0, -1, {
-      rev: true
+    const chats = await db.query.chat.findMany({
+      where: eq(chat.userId, userId)
     })
 
-    for (const chat of chats) {
-      pipeline.hgetall(chat)
-    }
-
-    const results = await pipeline.exec()
-
-    return results as Chat[]
+    return chats as Chat[]
   } catch (error) {
     return []
   }
 }
 
 export async function getChat(id: string, userId: string) {
-  const chat = await kv.hgetall<Chat>(`chat:${id}`)
+  const c = await db.query.chat.findFirst({
+    where: eq(chat.id, id)
+  })
 
-  if (!chat || (userId && chat.userId !== userId)) {
+  if (!c || (userId && c!.userId !== userId)) {
     return null
   }
 
-  return chat
+  return c as Chat
 }
 
 export async function removeChat({ id, path }: { id: string; path: string }) {
@@ -50,7 +47,14 @@ export async function removeChat({ id, path }: { id: string; path: string }) {
   }
 
   //Convert uid to string for consistent comparison with session.user.id
-  const uid = String(await kv.hget(`chat:${id}`, 'userId'))
+  const result = await db
+    .select({
+      uid: chat.userId
+    })
+    .from(chat)
+    .where(eq(chat.id, id))
+
+  const uid = result[0]?.uid ?? ''
 
   if (uid !== session?.user?.id) {
     return {
@@ -58,8 +62,7 @@ export async function removeChat({ id, path }: { id: string; path: string }) {
     }
   }
 
-  await kv.del(`chat:${id}`)
-  await kv.zrem(`user:chat:${session.user.id}`, `chat:${id}`)
+  await db.delete(chat).where(eq(chat.id, id))
 
   revalidatePath('/')
   return revalidatePath(path)
@@ -74,31 +77,35 @@ export async function clearChats() {
     }
   }
 
-  const chats: string[] = await kv.zrange(`user:chat:${session.user.id}`, 0, -1)
-  if (!chats.length) {
+  const ids = (
+    await db
+      .select({
+        id: chat.id
+      })
+      .from(chat)
+      .where(eq(chat.userId, session.user.id))
+  ).map(c => c.id)
+
+  if (!ids.length) {
     return redirect('/')
   }
-  const pipeline = kv.pipeline()
 
-  for (const chat of chats) {
-    pipeline.del(chat)
-    pipeline.zrem(`user:chat:${session.user.id}`, chat)
+  for (const id of ids) {
+    db.delete(chat).where(eq(chat.id, id))
   }
-
-  await pipeline.exec()
 
   revalidatePath('/')
   return redirect('/')
 }
 
 export async function getSharedChat(id: string) {
-  const chat = await kv.hgetall<Chat>(`chat:${id}`)
+  const c = await db.query.chat.findFirst({ where: eq(chat.id, id) })
 
-  if (!chat || !chat.sharePath) {
+  if (!c || !c.sharePath) {
     return null
   }
 
-  return chat
+  return c as Chat
 }
 
 export async function shareChat(id: string) {
@@ -110,35 +117,44 @@ export async function shareChat(id: string) {
     }
   }
 
-  const chat = await kv.hgetall<Chat>(`chat:${id}`)
+  // const chat = await kv.hgetall<Chat>(`chat:${id}`)
+  const c = await db.query.chat.findFirst({ where: eq(chat.id, id) })
 
-  if (!chat || chat.userId !== session.user.id) {
+  if (!c || c.userId !== session.user.id) {
     return {
       error: 'Something went wrong'
     }
   }
 
-  const payload = {
-    ...chat,
-    sharePath: `/share/${chat.id}`
-  }
+  const sharePath = `/share/${chat.id}`
 
-  await kv.hmset(`chat:${chat.id}`, payload)
+  await db
+    .update(chat)
+    .set({
+      sharePath
+    })
+    .where(eq(chat.id, id))
 
-  return payload
+  return {
+    ...c,
+    sharePath
+  } as Chat
 }
 
-export async function saveChat(chat: Chat) {
+export async function saveChat(c: Chat) {
   const session = await auth()
 
   if (session && session.user) {
-    const pipeline = kv.pipeline()
-    pipeline.hmset(`chat:${chat.id}`, chat)
-    pipeline.zadd(`user:chat:${chat.userId}`, {
-      score: Date.now(),
-      member: `chat:${chat.id}`
-    })
-    await pipeline.exec()
+    const newChat: typeof chat.$inferInsert = {
+      id: c.id,
+      title: c.title,
+      createdAt: new Date(),
+      userId: session.user.id!,
+      path: c.path,
+      messages: c.messages
+    }
+
+    await db.insert(chat).values(newChat)
   } else {
     return
   }
