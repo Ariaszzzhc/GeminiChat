@@ -29,10 +29,6 @@ export function ChatList({ messages, session, isShared }: ChatList) {
                 <Link href="/login" className="underline">
                   log in
                 </Link>{' '}
-                or{' '}
-                <Link href="/signup" className="underline">
-                  sign up
-                </Link>{' '}
                 to save and revisit your chat history!
               </p>
             </div>
