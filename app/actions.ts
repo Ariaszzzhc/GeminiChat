@@ -94,23 +94,11 @@ export async function clearChats() {
     }
   }
 
-  const chats = await db.chat.findMany({
+  await db.chat.deleteMany({
     where: {
       userId: session.user.id
     }
   })
-
-  if (!chats.length) {
-    return redirect('/')
-  }
-
-  for (const chat of chats) {
-    db.chat.deleteMany({
-      where: {
-        id: chat.id
-      }
-    })
-  }
 
   revalidatePath('/')
   return redirect('/')
