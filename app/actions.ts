@@ -83,7 +83,7 @@ export async function removeChat({
     }
   }
 
-  await db.chat.delete({
+  await db.chat.deleteMany({
     where: {
       id
     }
@@ -167,7 +167,7 @@ export async function shareChat(id: string): Promise<Chat | { error: string }> {
 
   const sharePath = `/share/${chat.id}`
 
-  await db.chat.update({
+  await db.chat.updateMany({
     where: {
       id
     },
@@ -196,9 +196,24 @@ export async function saveChat(c: Chat): Promise<void> {
       sharePath: c.sharePath
     }
 
-    await db.chat.create({
-      data: newChat
+    const oldChat = await db.chat.findFirst({
+      where: {
+        id: c.id
+      }
     })
+
+    if (oldChat) {
+      await db.chat.update({
+        where: {
+          dbId: oldChat.dbId
+        },
+        data: newChat
+      })
+    } else {
+      await db.chat.create({
+        data: newChat
+      })
+    }
   } else {
     return
   }

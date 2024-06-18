@@ -78,7 +78,7 @@ model VerificationToken {
 
 model Chat {
   dbId      String   @id @default(auto()) @map("_id") @db.ObjectId
-  id        String   @unique @map("uxternal_id") @db.String
+  id        String   @map("external_id") @db.String
   title     String
   createdAt DateTime @default(now()) @map("created_at")
   userId    String   @db.ObjectId
