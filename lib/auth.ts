@@ -1,17 +1,11 @@
 import NextAuth from 'next-auth'
 import { authConfig } from './auth.config'
-import { DrizzleAdapter } from '@auth/drizzle-adapter'
+import { PrismaAdapter } from '@auth/prisma-adapter'
 import Github from 'next-auth/providers/github'
-import { db } from './db'
-import { users, accounts, sessions, verificationTokens } from './schema'
+import db from './db'
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: DrizzleAdapter(db, {
-    usersTable: users,
-    accountsTable: accounts,
-    sessionsTable: sessions,
-    verificationTokensTable: verificationTokens
-  }),
+  adapter: PrismaAdapter(db),
   providers: [Github]
 })
