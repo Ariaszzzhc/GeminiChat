@@ -16,10 +16,6 @@ export async function getChats(userId?: string | null): Promise<Chat[]> {
     const chats = await db.chat.findMany({
       where: {
         userId: userId!
-      },
-      cacheStrategy: {
-        swr: 10,
-        ttl: 10
       }
     })
 
@@ -37,10 +33,6 @@ export async function getChat(
     where: {
       id,
       userId
-    },
-    cacheStrategy: {
-      swr: 10,
-      ttl: 10
     }
   })
 
@@ -128,10 +120,6 @@ export async function getSharedChat(id: string): Promise<Chat | null> {
   const chat = await db.chat.findFirst({
     where: {
       id
-    },
-    cacheStrategy: {
-      swr: 10,
-      ttl: 10
     }
   })
 
@@ -152,11 +140,7 @@ export async function shareChat(id: string): Promise<Chat | { error: string }> {
   }
 
   const chat = await db.chat.findFirst({
-    where: { id },
-    cacheStrategy: {
-      swr: 10,
-      ttl: 10
-    }
+    where: { id }
   })
 
   if (!chat || chat.userId !== session.user.id) {
