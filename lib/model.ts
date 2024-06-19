@@ -23,7 +23,7 @@ export const userModel = pgTable('users', {
 export const accountModel = pgTable(
   'accounts',
   {
-    userId: text('userId')
+    userId: text('user_id')
       .notNull()
       .references(() => userModel.id, { onDelete: 'cascade' }),
     type: text('type').$type<AdapterAccountType>().notNull(),
