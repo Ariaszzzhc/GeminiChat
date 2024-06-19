@@ -45,8 +45,8 @@ async function UserOrLogin() {
               return signIn('github')
             }}
           >
-            <Button variant="link" asChild className="-ml-2">
-              <span>Login</span>
+            <Button variant="outline" className="-ml-2">
+              Login
             </Button>
           </form>
         )}
