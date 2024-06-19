@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { type Chat } from '@/lib/types'
 import db from '@/lib/db'
+import { chatModel } from '@/lib/model'
+import { eq, and } from 'drizzle-orm'
 
 export async function getChats(userId?: string | null): Promise<Chat[]> {
   if (!userId) {
@@ -13,11 +15,10 @@ export async function getChats(userId?: string | null): Promise<Chat[]> {
   }
 
   try {
-    const chats = await db.chat.findMany({
-      where: {
-        userId: userId!
-      }
-    })
+    const chats = await db
+      .select()
+      .from(chatModel)
+      .where(eq(chatModel.userId, userId))
 
     return chats as any
   } catch (error) {
@@ -29,18 +30,17 @@ export async function getChat(
   id: string,
   userId: string
 ): Promise<Chat | null> {
-  const chat = await db.chat.findFirst({
-    where: {
-      id,
-      userId
-    }
-  })
+  const chats = await db
+    .select()
+    .from(chatModel)
+    .where(and(eq(chatModel.id, id), eq(chatModel.userId, userId)))
+    .limit(1)
 
-  if (!chat) {
+  if (chats.length === 0) {
     return null
   }
 
-  return chat as any
+  return chats[0] as any
 }
 
 export async function removeChat({
@@ -59,27 +59,25 @@ export async function removeChat({
   }
 
   //Convert uid to string for consistent comparison with session.user.id
-  const result = await db.chat.findFirst({
-    where: {
-      id
-    }
-  })
+  const result = await db
+    .select()
+    .from(chatModel)
+    .where(eq(chatModel.id, id))
+    .limit(1)
 
-  if (!result) {
+  if (result.length === 0) {
     return
   }
 
-  if (result.userId !== session?.user?.id) {
+  const chat = result[0]
+
+  if (chat.userId !== session?.user?.id) {
     return {
       error: 'Unauthorized'
     }
   }
 
-  await db.chat.deleteMany({
-    where: {
-      id
-    }
-  })
+  await db.delete(chatModel).where(eq(chatModel.id, id))
 
   revalidatePath('/')
   return revalidatePath(path)
@@ -94,24 +92,26 @@ export async function clearChats() {
     }
   }
 
-  await db.chat.deleteMany({
-    where: {
-      userId: session.user.id
-    }
-  })
+  await db.delete(chatModel).where(eq(chatModel.userId, session.user.id))
 
   revalidatePath('/')
   return redirect('/')
 }
 
 export async function getSharedChat(id: string): Promise<Chat | null> {
-  const chat = await db.chat.findFirst({
-    where: {
-      id
-    }
-  })
+  const result = await db
+    .select()
+    .from(chatModel)
+    .where(eq(chatModel.id, id))
+    .limit(1)
 
-  if (!chat || !chat.sharePath) {
+  if (result.length === 0) {
+    return null
+  }
+
+  const chat = result[0]
+
+  if (!chat.sharePath) {
     return null
   }
 
@@ -127,11 +127,21 @@ export async function shareChat(id: string): Promise<Chat | { error: string }> {
     }
   }
 
-  const chat = await db.chat.findFirst({
-    where: { id }
-  })
+  const result = await db
+    .select()
+    .from(chatModel)
+    .where(eq(chatModel.id, id))
+    .limit(1)
 
-  if (!chat || chat.userId !== session.user.id) {
+  if (result.length === 0) {
+    return {
+      error: 'Something went wrong'
+    }
+  }
+
+  const chat = result[0]
+
+  if (chat.userId !== session.user.id) {
     return {
       error: 'Something went wrong'
     }
@@ -139,14 +149,12 @@ export async function shareChat(id: string): Promise<Chat | { error: string }> {
 
   const sharePath = `/share/${chat.id}`
 
-  await db.chat.updateMany({
-    where: {
-      id
-    },
-    data: {
+  await db
+    .update(chatModel)
+    .set({
       sharePath
-    }
-  })
+    })
+    .where(eq(chatModel.id, id))
 
   return {
     ...chat,
@@ -168,23 +176,16 @@ export async function saveChat(c: Chat): Promise<void> {
       sharePath: c.sharePath
     }
 
-    const oldChat = await db.chat.findFirst({
-      where: {
-        id: c.id
-      }
-    })
+    const result = await db
+      .select()
+      .from(chatModel)
+      .where(eq(chatModel.id, c.id))
+      .limit(1)
 
-    if (oldChat) {
-      await db.chat.update({
-        where: {
-          dbId: oldChat.dbId
-        },
-        data: newChat
-      })
+    if (result.length !== 0) {
+      await db.update(chatModel).set(newChat).where(eq(chatModel.id, c.id))
     } else {
-      await db.chat.create({
-        data: newChat
-      })
+      await db.insert(chatModel).values(newChat)
     }
   } else {
     return
