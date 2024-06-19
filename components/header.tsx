@@ -39,16 +39,14 @@ async function UserOrLogin() {
         {session?.user ? (
           <UserMenu user={session.user} />
         ) : (
-          <form
-            action={async () => {
-              'use server'
-              signIn('github')
-            }}
+          <Button
+            variant="link"
+            asChild
+            className="-ml-2"
+            onClick={() => signIn('github')}
           >
-            <Button variant="link" asChild className="-ml-2">
-              Login
-            </Button>
-          </form>
+            <span>Login</span>
+          </Button>
         )}
       </div>
     </>
