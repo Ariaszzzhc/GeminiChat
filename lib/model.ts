@@ -10,25 +10,25 @@ import {
 import type { AdapterAccountType } from 'next-auth/adapters'
 import { Message } from './types'
 
-export const userModel = pgTable('users', {
+export const users = pgTable('user', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text('name'),
   email: text('email').notNull(),
-  emailVerified: timestamp('email_verified', { mode: 'date' }),
+  emailVerified: timestamp('emailVerified', { mode: 'date' }),
   image: text('image')
 })
 
-export const accountModel = pgTable(
-  'accounts',
+export const accounts = pgTable(
+  'account',
   {
-    userId: text('user_id')
+    userId: text('userId')
       .notNull()
-      .references(() => userModel.id, { onDelete: 'cascade' }),
+      .references(() => users.id, { onDelete: 'cascade' }),
     type: text('type').$type<AdapterAccountType>().notNull(),
     provider: text('provider').notNull(),
-    providerAccountId: text('provider_account_id').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
     refresh_token: text('refresh_token'),
     access_token: text('access_token'),
     expires_at: integer('expires_at'),
@@ -44,16 +44,16 @@ export const accountModel = pgTable(
   })
 )
 
-export const sessionModel = pgTable('sessions', {
-  sessionToken: text('session_token').primaryKey(),
-  userId: text('user_id')
+export const sessions = pgTable('session', {
+  sessionToken: text('sessionToken').primaryKey(),
+  userId: text('userId')
     .notNull()
-    .references(() => userModel.id, { onDelete: 'cascade' }),
+    .references(() => users.id, { onDelete: 'cascade' }),
   expires: timestamp('expires', { mode: 'date' }).notNull()
 })
 
-export const verificationTokenModel = pgTable(
-  'verification_tokens',
+export const verificationTokens = pgTable(
+  'verificationToken',
   {
     identifier: text('identifier').notNull(),
     token: text('token').notNull(),
@@ -66,18 +66,18 @@ export const verificationTokenModel = pgTable(
   })
 )
 
-export const authenticatorModel = pgTable(
-  'authenticators',
+export const authenticators = pgTable(
+  'authenticator',
   {
-    credentialID: text('credential_id').notNull().unique(),
-    userId: text('user_id')
+    credentialID: text('credentialID').notNull().unique(),
+    userId: text('userId')
       .notNull()
-      .references(() => userModel.id, { onDelete: 'cascade' }),
-    providerAccountId: text('provider_account_id').notNull(),
-    credentialPublicKey: text('credential_public_key').notNull(),
+      .references(() => users.id, { onDelete: 'cascade' }),
+    providerAccountId: text('providerAccountId').notNull(),
+    credentialPublicKey: text('credentialPublicKey').notNull(),
     counter: integer('counter').notNull(),
-    credentialDeviceType: text('credential_device_type').notNull(),
-    credentialBackedUp: boolean('credential_backed_up').notNull(),
+    credentialDeviceType: text('credentialDeviceType').notNull(),
+    credentialBackedUp: boolean('credentialBackedUp').notNull(),
     transports: text('transports')
   },
   authenticator => ({
@@ -87,13 +87,13 @@ export const authenticatorModel = pgTable(
   })
 )
 
-export const chatModel = pgTable('chats', {
+export const chats = pgTable('chats', {
   id: text('id').primaryKey(),
   title: text('title').notNull(),
   createdAt: timestamp('created_at', { mode: 'date' }).notNull(),
   userId: text('user_id')
     .notNull()
-    .references(() => userModel.id, { onDelete: 'cascade' }),
+    .references(() => users.id, { onDelete: 'cascade' }),
   path: text('path').notNull(),
   messages: json('messages').$type<Message[]>().notNull(),
   sharePath: text('share_path')

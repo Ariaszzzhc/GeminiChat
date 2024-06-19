@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { type Chat } from '@/lib/types'
 import db from '@/lib/db'
-import { chatModel } from '@/lib/model'
+import { chats as chatModel } from '@/lib/model'
 import { eq, and } from 'drizzle-orm'
 
 export async function getChats(userId?: string | null): Promise<Chat[]> {

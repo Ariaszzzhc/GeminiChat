@@ -1,7 +1,6 @@
-import { neon } from '@neondatabase/serverless'
-import { drizzle } from 'drizzle-orm/neon-http'
+import { sql } from '@vercel/postgres'
+import { drizzle } from 'drizzle-orm/vercel-postgres'
 
-const sql = neon(process.env.DRIZZLE_DATABASE_URL!)
 const db = drizzle(sql)
 
 export default db

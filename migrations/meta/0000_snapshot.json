@@ -1,15 +1,15 @@
 {
-  "id": "86cfb6ec-8d5b-4a47-97c0-46e7993b7b58",
+  "id": "279c8536-6ba4-45f9-b5ec-3e555123873c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.accounts": {
-      "name": "accounts",
+    "public.account": {
+      "name": "account",
       "schema": "",
       "columns": {
-        "user_id": {
-          "name": "user_id",
+        "userId": {
+          "name": "userId",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -26,8 +26,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "provider_account_id": {
-          "name": "provider_account_id",
+        "providerAccountId": {
+          "name": "providerAccountId",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -77,12 +77,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "accounts_user_id_users_id_fk": {
-          "name": "accounts_user_id_users_id_fk",
-          "tableFrom": "accounts",
-          "tableTo": "users",
+        "account_userId_user_id_fk": {
+          "name": "account_userId_user_id_fk",
+          "tableFrom": "account",
+          "tableTo": "user",
           "columnsFrom": [
-            "user_id"
+            "userId"
           ],
           "columnsTo": [
             "id"
@@ -92,40 +92,40 @@
         }
       },
       "compositePrimaryKeys": {
-        "accounts_provider_provider_account_id_pk": {
-          "name": "accounts_provider_provider_account_id_pk",
+        "account_provider_providerAccountId_pk": {
+          "name": "account_provider_providerAccountId_pk",
           "columns": [
             "provider",
-            "provider_account_id"
+            "providerAccountId"
           ]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.authenticators": {
-      "name": "authenticators",
+    "public.authenticator": {
+      "name": "authenticator",
       "schema": "",
       "columns": {
-        "credential_id": {
-          "name": "credential_id",
+        "credentialID": {
+          "name": "credentialID",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "userId": {
+          "name": "userId",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "provider_account_id": {
-          "name": "provider_account_id",
+        "providerAccountId": {
+          "name": "providerAccountId",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "credential_public_key": {
-          "name": "credential_public_key",
+        "credentialPublicKey": {
+          "name": "credentialPublicKey",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -136,14 +136,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "credential_device_type": {
-          "name": "credential_device_type",
+        "credentialDeviceType": {
+          "name": "credentialDeviceType",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "credential_backed_up": {
-          "name": "credential_backed_up",
+        "credentialBackedUp": {
+          "name": "credentialBackedUp",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true
@@ -157,12 +157,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "authenticators_user_id_users_id_fk": {
-          "name": "authenticators_user_id_users_id_fk",
-          "tableFrom": "authenticators",
-          "tableTo": "users",
+        "authenticator_userId_user_id_fk": {
+          "name": "authenticator_userId_user_id_fk",
+          "tableFrom": "authenticator",
+          "tableTo": "user",
           "columnsFrom": [
-            "user_id"
+            "userId"
           ],
           "columnsTo": [
             "id"
@@ -172,20 +172,20 @@
         }
       },
       "compositePrimaryKeys": {
-        "authenticators_user_id_credential_id_pk": {
-          "name": "authenticators_user_id_credential_id_pk",
+        "authenticator_userId_credentialID_pk": {
+          "name": "authenticator_userId_credentialID_pk",
           "columns": [
-            "user_id",
-            "credential_id"
+            "userId",
+            "credentialID"
           ]
         }
       },
       "uniqueConstraints": {
-        "authenticators_credential_id_unique": {
-          "name": "authenticators_credential_id_unique",
+        "authenticator_credentialID_unique": {
+          "name": "authenticator_credentialID_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "credential_id"
+            "credentialID"
           ]
         }
       }
@@ -239,10 +239,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "chats_user_id_users_id_fk": {
-          "name": "chats_user_id_users_id_fk",
+        "chats_user_id_user_id_fk": {
+          "name": "chats_user_id_user_id_fk",
           "tableFrom": "chats",
-          "tableTo": "users",
+          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
@@ -256,18 +256,18 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.sessions": {
-      "name": "sessions",
+    "public.session": {
+      "name": "session",
       "schema": "",
       "columns": {
-        "session_token": {
-          "name": "session_token",
+        "sessionToken": {
+          "name": "sessionToken",
           "type": "text",
           "primaryKey": true,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "userId": {
+          "name": "userId",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -281,12 +281,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "sessions_user_id_users_id_fk": {
-          "name": "sessions_user_id_users_id_fk",
-          "tableFrom": "sessions",
-          "tableTo": "users",
+        "session_userId_user_id_fk": {
+          "name": "session_userId_user_id_fk",
+          "tableFrom": "session",
+          "tableTo": "user",
           "columnsFrom": [
-            "user_id"
+            "userId"
           ],
           "columnsTo": [
             "id"
@@ -298,8 +298,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.users": {
-      "name": "users",
+    "public.user": {
+      "name": "user",
       "schema": "",
       "columns": {
         "id": {
@@ -320,8 +320,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "email_verified": {
-          "name": "email_verified",
+        "emailVerified": {
+          "name": "emailVerified",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
@@ -338,8 +338,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.verification_tokens": {
-      "name": "verification_tokens",
+    "public.verificationToken": {
+      "name": "verificationToken",
       "schema": "",
       "columns": {
         "identifier": {
@@ -364,8 +364,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "verification_tokens_identifier_token_pk": {
-          "name": "verification_tokens_identifier_token_pk",
+        "verificationToken_identifier_token_pk": {
+          "name": "verificationToken_identifier_token_pk",
           "columns": [
             "identifier",
             "token"
