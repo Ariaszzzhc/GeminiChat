@@ -45,7 +45,7 @@ async function UserOrLogin() {
             className="-ml-2"
             onClick={() => signIn('github')}
           >
-            <Link href="/login">Login</Link>
+            Login
           </Button>
         )}
       </div>
