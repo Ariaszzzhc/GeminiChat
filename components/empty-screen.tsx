@@ -11,8 +11,9 @@ export function EmptyScreen() {
           <ExternalLink href="https://sdk.vercel.ai">
             Vercel AI SDK
           </ExternalLink>
-          , <ExternalLink href="https://www.prisma.io/">Prisma</ExternalLink>
-          and <ExternalLink href="https://mongodb.com/">Mongodb</ExternalLink>.
+          , <ExternalLink href="https://www.prisma.io/">Drizzle</ExternalLink>
+          and{' '}
+          <ExternalLink href="https://mongodb.com/">PostgreSql</ExternalLink>.
         </p>
         <p className="leading-normal text-muted-foreground">
           It uses{' '}
