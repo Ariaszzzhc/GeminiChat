@@ -38,18 +38,18 @@ async function UserOrLogin() {
         <IconSeparator className="size-6 text-muted-foreground/50" />
         {session?.user ? (
           <UserMenu user={session.user} />
-        ) : (
-          <form
-            action={async () => {
-              'use server'
-              return signIn('github')
-            }}
-          >
-            <Button variant="outline" className="-ml-2">
-              Login
-            </Button>
-          </form>
-        )}
+        ) : null
+        // <form
+        //   action={async () => {
+        //     'use server'
+        //     return signIn('github')
+        //   }}
+        // >
+        //   <Button variant="outline" className="-ml-2">
+        //     Login
+        //   </Button>
+        // </form>
+        }
       </div>
     </>
   )
