@@ -6,8 +6,7 @@ import db from './db'
 export const authConfig: NextAuthConfig = {
   secret: process.env.AUTH_SECRET,
   pages: {
-    signIn: '/login',
-    newUser: '/signup'
+    signIn: '/login'
   },
   adapter: DrizzleAdapter(db),
   providers: [Github]
