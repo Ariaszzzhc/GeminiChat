@@ -15,6 +15,7 @@ import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
 import { ChatHistory } from './chat-history'
 import { Session } from '@/lib/types'
+import { signIn } from 'next-auth/react'
 
 async function UserOrLogin() {
   const session = (await auth()) as Session
@@ -38,7 +39,12 @@ async function UserOrLogin() {
         {session?.user ? (
           <UserMenu user={session.user} />
         ) : (
-          <Button variant="link" asChild className="-ml-2">
+          <Button
+            variant="link"
+            asChild
+            className="-ml-2"
+            onClick={() => signIn('github')}
+          >
             <Link href="/login">Login</Link>
           </Button>
         )}
